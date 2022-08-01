@@ -1,5 +1,5 @@
 # Terraria Image Stitcher - Danny Russ
-[![Build status](https://ci.appveyor.com/api/projects/status/4je4mgn8thq15cf9?svg=true)](https://ci.appveyor.com/project/RussDev7/terrariaimagestitcher) [![GitHub Version](https://img.shields.io/github/tag/RussDev7/TerrariaImageStitcher.svg?label=GitHub)](https://github.com/RussDev7/TerrariaImageStitcher) [![Contributors](https://img.shields.io/github/contributors/RussDev7/TerrariaImageStitcher)](https://github.com/RussDev7/TerrariaImageStitcher)
+[![Build status](https://ci.appveyor.com/api/projects/status/apba6df8vwmfge9n?svg=true)](https://ci.appveyor.com/project/RussDev7/terrariaimagestitcher) [![GitHub Version](https://img.shields.io/github/tag/RussDev7/TerrariaImageStitcher.svg?label=GitHub)](https://github.com/RussDev7/TerrariaImageStitcher) [![Contributors](https://img.shields.io/github/contributors/RussDev7/TerrariaImageStitcher)](https://github.com/RussDev7/TerrariaImageStitcher)
 
 ![TIS-2](https://user-images.githubusercontent.com/33048298/182255984-25f066f8-3a30-4bec-906a-6f066dcd7646.png)  
 
