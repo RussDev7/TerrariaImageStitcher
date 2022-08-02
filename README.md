@@ -56,8 +56,9 @@ Terraria Image Stitcher is a tool for combining images created from Terraria's i
  2. Terraria for PC
 
 ## Preview
-![release done and tested](https://user-images.githubusercontent.com/33048298/182256193-238ca989-5e17-4d1c-bbd1-a073d4cb6406.PNG)
-
+![release done and tested](https://user-images.githubusercontent.com/33048298/182271342-97e068e4-82b1-4446-aecf-137ae80f69e8.PNG)  
+  
+![StitcherAbout](https://user-images.githubusercontent.com/33048298/182271715-085ae7d6-b3b7-4df5-ad7f-359ffc794bad.PNG)
 
 ## Important Links
 
