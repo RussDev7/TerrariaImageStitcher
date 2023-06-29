@@ -6,7 +6,7 @@
 @ECHO OFF
 
 Rem | Set Params
-Set "VersionPrefix=1.0.0.0"
+Set "VersionPrefix=1.1.0.0"
 Set "filename=TerrariaImageStitcher-%VersionPrefix%"
 
 Rem | Install SLN Under x64 Profile
