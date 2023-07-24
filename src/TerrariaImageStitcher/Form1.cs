@@ -124,7 +124,7 @@ namespace TerrariaImageStitcher
                                 // Update Image First Run
                                 if (temptall <= 1)
                                 {
-                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height));
+                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height)); // Fix 1.1: (image.Width + 32) fixed the single width issue.
                                 }
                                 else
                                 {
