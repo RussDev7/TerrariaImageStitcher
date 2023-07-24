@@ -106,7 +106,6 @@ namespace TerrariaImageStitcher
                 }
 
                 finalImage = new System.Drawing.Bitmap(width, (temptall * 2048) + 32); // Fix 1.2: width, (temptall * 2048) + 32 - Fixed single horizontal issue.
-                MessageBox.Show(width.ToString(), height.ToString());
 
                 //get a graphics object from the image so we can draw on it
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(finalImage))
