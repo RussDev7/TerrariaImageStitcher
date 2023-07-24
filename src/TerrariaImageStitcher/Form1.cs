@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
@@ -88,9 +89,6 @@ namespace TerrariaImageStitcher
                     }
                 }
 
-                //create a bitmap to hold the combined image
-                finalImage = new System.Drawing.Bitmap((tempwidth * 2048) + 32, (temptall * 2048) + 32);
-
                 // Setup Progress Bar
                 progressBar1.Step = 1;
                 progressBar1.Maximum = (tempwidth * temptall) + 1;
@@ -106,6 +104,9 @@ namespace TerrariaImageStitcher
 
                     images.Add(bitmap);
                 }
+
+                finalImage = new System.Drawing.Bitmap(width, (temptall * 2048) + 32); // Fix 1.2: width, (temptall * 2048) + 32 - Fixed single horizontal issue.
+                MessageBox.Show(width.ToString(), height.ToString());
 
                 //get a graphics object from the image so we can draw on it
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(finalImage))
