@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace TerrariaImageStitcher
@@ -11,7 +11,7 @@ namespace TerrariaImageStitcher
     {
 
         // Say Hello To Decompilers
-        private string HelloThere = "Hello there fellow Decompiler, This Program Was Made By D.RU$$ (xXCrypticNightXx).";
+        private readonly string HelloThere = "Hello there fellow Decompiler, This Program Was Made By D.RU$$ (xXCrypticNightXx).";
 
         #region Main Code
 
@@ -28,7 +28,6 @@ namespace TerrariaImageStitcher
         // Stitch Photo Function
         public System.Drawing.Bitmap CombineBitmap(string[] files)
         {
-
             //read all images into memory
             List<System.Drawing.Bitmap> images = new List<System.Drawing.Bitmap>();
             System.Drawing.Bitmap finalImage = null;
@@ -112,6 +111,7 @@ namespace TerrariaImageStitcher
                 {
                     //set background color
                     g.Clear(System.Drawing.Color.Transparent);
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
                     //go through each image and draw it on the final image
                     foreach (System.Drawing.Bitmap image in images)
@@ -187,17 +187,17 @@ namespace TerrariaImageStitcher
                             firstrun = true;
 
                             imgtall = 0;
-                            imgwide = imgwide + 2048;
+                            imgwide += 2048;
 
                             // For Cropping Tall
                             if (!locktall)
                             {
-                                tallcount = tallcount + image.Height;
+                                tallcount += image.Height;
                                 locktall = true;
                             }
 
                             // For Cropping Wide
-                            widecount = widecount + image.Width;
+                            widecount += image.Width;
 
                             // Progress Progressbar
                             progressBar1.PerformStep();
@@ -205,12 +205,12 @@ namespace TerrariaImageStitcher
                         }
                         else
                         {
-                            imgtall = imgtall + 2048;
+                            imgtall += 2048;
 
                             // For Cropping
                             if (!locktall)
                             {
-                                tallcount = tallcount + image.Height;
+                                tallcount += image.Height;
                             }
 
                             // Progress Progressbar
@@ -233,8 +233,11 @@ namespace TerrariaImageStitcher
             }
             catch (Exception ex)
             {
+                // Not simplifing for compatibility reasons.
                 if (finalImage != null)
                     finalImage.Dispose();
+
+                throw ex;
 
                 throw ex;
             }
@@ -284,7 +287,10 @@ namespace TerrariaImageStitcher
                 }
                 else if (radioButton2.Checked)
                 {
-                    final.Save(SaveLoc + ".jpg", ImageFormat.Jpeg);
+                    // Ensure we grab the highest possible encoder settings for jps.
+                    var encoder = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Jpeg.Guid);
+                    var encParams = new EncoderParameters() { Param = new[] { new EncoderParameter(Encoder.Quality, 100L) } };
+                    final.Save(SaveLoc + ".jpg", encoder, encParams);
                 }
                 else if (radioButton3.Checked)
                 {
