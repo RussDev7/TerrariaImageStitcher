@@ -117,109 +117,26 @@ namespace TerrariaImageStitcher
                     foreach (System.Drawing.Bitmap image in images)
                     {
 
-                        if (widthcountrunner >= (temptall * tempwidth) - temptall) // LAST ROW
-                        {
-                            if (firstrun) // First Row
-                            {
-                                // Update Image First Run
-                                if (temptall <= 1)
-                                {
-                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height)); // Fix 1.1: (image.Width + 32) fixed the single width issue.
-                                }
-                                else
-                                {
-                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height + 32));
-                                }
-
-                                // Update Bool
-                                firstrun = false;
-                            }
-                            else if (tallcountrunner == temptall - 1) // Bottom Row
-                            {
-                                // Reset Count
-                                tallcountrunner = -1;
-
-                                // Update Image First Run
-                                g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height));
-                            }
-                            else // Everything Else
-                            {
-                                // Update Image Each Time After
-                                g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height + 32));
-                            }
-                        }
-                        else
-                        { // Everything EXCEPT LAST ROW
-                            if (firstrun) // First Row
-                            {
-                                // Update Image First Run
-                                if (temptall <= 1)
-                                {
-                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height)); // Fix 1.1: (image.Width + 32) - Horizontal lengh issue.
-                                }
-                                else
-                                {
-                                    g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height + 32));
-                                }
-
-                                // Update Bool
-                                firstrun = false;
-                            }
-                            else if (tallcountrunner == temptall - 1) // Bottom Row
-                            {
-                                // Reset Count
-                                tallcountrunner = -1;
-
-                                // Update Image First Run
-                                g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height));
-                            }
-                            else // Everything Else
-                            {
-                                // Update Image Each Time After
-                                g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width + 32, image.Height + 32));
-                            }
-                        }
-
-                        // Manage Y
-                        if (imgtall >= ((2048 * temptall) - 2048))
-                        {
-                            // Update Firstrun
-                            firstrun = true;
-
-                            imgtall = 0;
-                            imgwide += 2048;
-
-                            // For Cropping Tall
-                            if (!locktall)
-                            {
-                                tallcount += image.Height;
-                                locktall = true;
-                            }
-
-                            // For Cropping Wide
-                            widecount += image.Width;
-
-                            // Progress Progressbar
-                            progressBar1.PerformStep();
-
-                        }
-                        else
-                        {
-                            imgtall += 2048;
-
-                            // For Cropping
-                            if (!locktall)
-                            {
-                                tallcount += image.Height;
-                            }
-
-                            // Progress Progressbar
-                            progressBar1.PerformStep();
-
-                        }
+                        g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height));
                         tallcountrunner++;
-                        widthcountrunner++;
+                        if (imgwide == 0)
+                            tallcount += image.Height;
+                        if (tallcountrunner < temptall)
+                        {
+                            imgtall += 2016;
+                            progressBar1.PerformStep();
+                        }
+                        else
+                        {
+                            tallcountrunner = 0;
+                            imgtall = 0;
+                            imgwide += 2016;
+                            progressBar1.PerformStep();
+                            widecount += image.Width;
+                        }
                     }
+                    tallcount -= (temptall - 1) * 32;
+                    widecount -= (tempwidth - 1) * 32;
                 }
 
                 // Crop Image
