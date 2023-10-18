@@ -34,9 +34,6 @@ namespace TerrariaImageStitcher
 
             try
             {
-
-                bool firstrun = true;
-
                 int imgwide = 0;
                 int imgtall = 0;
                 int width = 0;
@@ -44,7 +41,6 @@ namespace TerrariaImageStitcher
 
                 int widecount = 0;
                 int tallcount = 0;
-                bool locktall = false;
 
                 int oldvalue = 0;
                 bool lockit = false;
@@ -54,7 +50,6 @@ namespace TerrariaImageStitcher
                 int temptall = 0;
 
                 int tallcountrunner = 0;
-                int widthcountrunner = 0;
 
                 foreach (string image in files)
                 {
@@ -153,8 +148,6 @@ namespace TerrariaImageStitcher
                 // Not simplifing for compatibility reasons.
                 if (finalImage != null)
                     finalImage.Dispose();
-
-                throw ex;
 
                 throw ex;
             }
@@ -303,7 +296,5 @@ namespace TerrariaImageStitcher
         }
 
         #endregion
-
     }
-
 }
