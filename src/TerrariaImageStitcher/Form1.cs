@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
+﻿using ImageMagick;
+using System;
 using System.Windows.Forms;
 
 namespace TerrariaImageStitcher
 {
     public partial class Form1 : Form
     {
-
         // Say Hello To Decompilers
-        private readonly string HelloThere = "Hello there fellow Decompiler, This Program Was Made By D.RU$$ (xXCrypticNightXx).";
+        private readonly string HelloThere = "Hello there fellow Decompiler, This Program Was Made By dannyruss (xXCrypticNightXx).";
 
         #region Main Code
 
@@ -26,18 +22,16 @@ namespace TerrariaImageStitcher
         public int imgtall = 0;
 
         // Stitch Photo Function
-        public System.Drawing.Bitmap CombineBitmap(string[] files)
+        public void CombineBitmap(string[] files)
         {
-            //read all images into memory
-            List<System.Drawing.Bitmap> images = new List<System.Drawing.Bitmap>();
-            System.Drawing.Bitmap finalImage = null;
+            // Setup Progress Bar
+            progressBar1.Step = 1;
+            progressBar1.PerformStep();
 
             try
             {
                 int imgwide = 0;
                 int imgtall = 0;
-                int width = 0;
-                int height = 0;
 
                 int widecount = 0;
                 int tallcount = 0;
@@ -46,13 +40,17 @@ namespace TerrariaImageStitcher
                 bool lockit = false;
                 bool dead = false;
 
-                int tempwidth = 1;
-                int temptall = 0;
+                int stackedImagesTall = 0;
+                int stackedImagesWide = 1;
 
                 int tallcountrunner = 0;
 
                 foreach (string image in files)
                 {
+                    // Add each image from files to an image array.
+                    // images.Add(new MagickImage(image));
+
+                    // Continue to do math on existing images.
                     int pos = image.LastIndexOf(@"\") + 1;
                     string filenumber = image.Substring(pos, image.Length - pos).GetUntilOrEmpty();
 
@@ -61,7 +59,7 @@ namespace TerrariaImageStitcher
                         // Look For First Number
                         if (!dead)
                         {
-                            temptall++;
+                            stackedImagesTall++;
                             oldvalue = int.Parse(filenumber);
                         }
                         lockit = true;
@@ -72,51 +70,69 @@ namespace TerrariaImageStitcher
                         dead = true;
                         lockit = false;
                         oldvalue = int.Parse(filenumber);
-                        tempwidth++;
+                        stackedImagesWide++;
                     }
                     else
                     {
                         if (!dead)
                         {
-                            temptall++;
+                            stackedImagesTall++;
                         }
                     }
                 }
+                // Setup Progress Bar.
+                progressBar1.Maximum = (stackedImagesWide * stackedImagesTall) + 2;
 
-                // Setup Progress Bar
-                progressBar1.Step = 1;
-                progressBar1.Maximum = (tempwidth * temptall) + 1;
-
-                foreach (string image in files)
+                // Grab the final images width and height to reduce load time.
+                foreach (string file in files)
                 {
-                    //create a Bitmap from the file and add it to the list
-                    System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(image);
-
-                    //update the size of the final bitmap
-                    width += bitmap.Width;
-                    height = bitmap.Height > height ? bitmap.Height : height;
-
-                    images.Add(bitmap);
-                }
-
-                finalImage = new System.Drawing.Bitmap(width, (temptall * 2048) + 32); // Fix 1.2: width, (temptall * 2048) + 32 - Fixed single horizontal issue.
-
-                //get a graphics object from the image so we can draw on it
-                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(finalImage))
-                {
-                    //set background color
-                    g.Clear(System.Drawing.Color.Transparent);
-                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-
-                    //go through each image and draw it on the final image
-                    foreach (System.Drawing.Bitmap image in images)
+                    using (MagickImage image = new MagickImage(file))
                     {
-
-                        g.DrawImage(image, new System.Drawing.Rectangle(imgwide, imgtall, image.Width, image.Height));
                         tallcountrunner++;
                         if (imgwide == 0)
                             tallcount += image.Height;
-                        if (tallcountrunner < temptall)
+                        if (tallcountrunner < stackedImagesTall)
+                        {
+                            imgtall += 2016;
+                        }
+                        else
+                        {
+                            tallcountrunner = 0;
+                            imgtall = 0;
+                            imgwide += 2016;
+                            widecount += image.Width;
+                        }
+                    }
+                }
+                // Define real image height.
+                int IWidth = widecount - ((stackedImagesWide - 1) * 32);
+                int IHeight = tallcount - ((stackedImagesTall - 1) * 32);
+
+                // Reset variables.
+                widecount = 0;
+                tallcount = 0;
+                imgtall = 0;
+                imgwide = 0;
+                tallcountrunner = 0;
+
+                // Define a new image using the finals height and width.
+                MagickImage finalImage = new MagickImage(MagickColors.White, IWidth, IHeight);
+
+                // Go through each image and draw it on the final image
+                foreach (string file in files)
+                {
+                    using (MagickImage image = new MagickImage(file))
+                    {
+                        // Define image quality.
+                        image.Quality = 100;
+
+                        // Draw new image on top of final.
+                        finalImage.Draw(new DrawableComposite(imgwide, imgtall, image));
+
+                        tallcountrunner++;
+                        if (imgwide == 0)
+                            tallcount += image.Height;
+                        if (tallcountrunner < stackedImagesTall)
                         {
                             imgtall += 2016;
                             progressBar1.PerformStep();
@@ -130,34 +146,65 @@ namespace TerrariaImageStitcher
                             widecount += image.Width;
                         }
                     }
-                    tallcount -= (temptall - 1) * 32;
-                    widecount -= (tempwidth - 1) * 32;
                 }
 
-                // Crop Image
-                Bitmap finalImagecroped = new System.Drawing.Bitmap(widecount, tallcount);
-                finalImagecroped = finalImage.Clone(new Rectangle(0, 0, widecount, tallcount), PixelFormat.DontCare);
+                // Define settings and export image.
+                using (IMagickImage result = finalImage)
+                {
+                    // Get the image format.
+                    string imageFormat = "";
+                    if (radioButton1.Checked)
+                    {
+                        result.Format = MagickFormat.Png;
+                        imageFormat = ".png";
+                    }
+                    else if (radioButton2.Checked)
+                    {
+                        result.Format = MagickFormat.Jpeg;
+                        imageFormat = ".jpeg";
+                    }
+                    else if (radioButton3.Checked)
+                    {
+                        result.Format = MagickFormat.Bmp;
+                        imageFormat = ".bmp";
+                    }
+                    else if (radioButton4.Checked)
+                    {
+                        result.Format = MagickFormat.Emf;
+                        imageFormat = ".emf";
+                    }
+                    else if (radioButton5.Checked)
+                    {
+                        result.Format = MagickFormat.Icon;
+                        imageFormat = ".icon";
+                    }
+                    else if (radioButton6.Checked)
+                    {
+                        result.Format = MagickFormat.Gif;
+                        imageFormat = ".gif";
+                    }
+                    else if (radioButton6.Checked)
+                    {
+                        result.Format = MagickFormat.Wmf;
+                        imageFormat = ".wmf";
+                    }
+
+                    // Define quality.
+                    result.Quality = 100;
+
+                    // Write output file.
+                    result.Write(textBox2.Text + imageFormat);
+                }
 
                 // Progress Progressbar
                 progressBar1.PerformStep();
-
-                return finalImagecroped;
             }
             catch (Exception ex)
             {
-                // Not simplifing for compatibility reasons.
-                if (finalImage != null)
-                    finalImage.Dispose();
-
                 throw ex;
             }
             finally
             {
-                //clean up memory
-                foreach (System.Drawing.Bitmap image in images)
-                {
-                    image.Dispose();
-                }
             }
         }
 
@@ -183,49 +230,14 @@ namespace TerrariaImageStitcher
             }
             else
             {
-
                 // Reset ProgressBar
                 progressBar1.Value = 0;
 
                 // Convert Bitmap
-                Bitmap final = CombineBitmap(PhotosLoc);
-
-                // Save Bitmap
-                if (radioButton1.Checked)
-                {
-                    final.Save(SaveLoc + ".png", ImageFormat.Png);
-                }
-                else if (radioButton2.Checked)
-                {
-                    // Ensure we grab the highest possible encoder settings for jps.
-                    var encoder = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Jpeg.Guid);
-                    var encParams = new EncoderParameters() { Param = new[] { new EncoderParameter(Encoder.Quality, 100L) } };
-                    final.Save(SaveLoc + ".jpg", encoder, encParams);
-                }
-                else if (radioButton3.Checked)
-                {
-                    final.Save(SaveLoc + ".bmp", ImageFormat.Bmp);
-                }
-                else if (radioButton4.Checked)
-                {
-                    final.Save(SaveLoc + ".emf", ImageFormat.Emf);
-                }
-                else if (radioButton5.Checked)
-                {
-                    final.Save(SaveLoc + ".ico", ImageFormat.Icon);
-                }
-                else if (radioButton6.Checked)
-                {
-                    final.Save(SaveLoc + ".gif", ImageFormat.Gif);
-                }
-                else if (radioButton7.Checked)
-                {
-                    final.Save(SaveLoc + ".wmf", ImageFormat.Wmf);
-                }
+                CombineBitmap(PhotosLoc);
 
                 // Job Finished
                 MessageBox.Show("Stitch Has Completed!");
-
             }
         }
 
@@ -275,8 +287,10 @@ namespace TerrariaImageStitcher
             }
 
         }
-
     }
+    #endregion
+
+    #region Helper Classes
 
     static class Helper
     {
@@ -294,7 +308,6 @@ namespace TerrariaImageStitcher
 
             return String.Empty;
         }
-
-        #endregion
     }
+    #endregion
 }
